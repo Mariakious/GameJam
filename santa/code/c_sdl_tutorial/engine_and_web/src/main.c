@@ -9,7 +9,7 @@
 #define WIDTH 1280
 #define HEIGHT 720
 #define PLAYER_SPEED 320
-
+int flag = 0;
 static struct
 {
     ng_game_t game;
@@ -42,7 +42,7 @@ static void create_actors(void)
     ctx.cross_texture = IMG_LoadTexture(ctx.game.renderer, "res/cross.png");
     ctx.orn_texture = IMG_LoadTexture(ctx.game.renderer, "res/red_orn.png");
     ctx.gem_sfx = ng_audio_load("res/gem.wav");
-
+    
     // create sprites
         // player
     ng_interval_create(&ctx.game_tick, 50);
@@ -78,7 +78,6 @@ static void handle_event(SDL_Event *event)
         // Press space for a sound effect!
         if (event->key.keysym.sym == SDLK_SPACE)
             ng_audio_play(ctx.gem_sfx);
-
         break;
 
     case SDL_MOUSEMOTION:
@@ -87,11 +86,15 @@ static void handle_event(SDL_Event *event)
         ctx.cross.transform.x = event->motion.x - ctx.cross.transform.w / 2;
         ctx.cross.transform.y = event->motion.y - ctx.cross.transform.h / 2;
         break;
+    case SDL_MOUSEBUTTONDOWN:
+        flag = 1;
     }
 }
 
 static void update_and_render_scene(float delta)
 {
+
+
     // Handling "continuous" events, which are now repeatable
     const Uint8* keys = SDL_GetKeyboardState(NULL);
 
@@ -127,7 +130,15 @@ static void update_and_render_scene(float delta)
     ng_sprite_render(&ctx.explosion.sprite, ctx.game.renderer);
     ng_sprite_render(&ctx.welcome_text.sprite, ctx.game.renderer);
 
-    ng_sprite_render(&ctx.orn, ctx.game.renderer);
+    if (flag = 1) {
+        ctx.orn.transform.x = ctx.player.transform.x;
+        ctx.orn.transform.y = ctx.player.transform.y;
+        ng_sprite_render(&ctx.orn, ctx.game.renderer);
+        flag++;
+    } 
+    if (flag > 1) {
+        ng_sprite_render(&ctx.orn, ctx.game.renderer);
+    }
 
     ng_sprite_render(&ctx.cross, ctx.game.renderer);
 }
