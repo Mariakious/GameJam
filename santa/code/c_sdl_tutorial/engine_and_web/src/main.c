@@ -18,12 +18,13 @@ static struct
     // A collection of assets used by entities
     // Ideally, they should have been automatically loaded
     // by iterating over the res/ folder and filling in a hastable
+
     SDL_Texture *player_texture, *explosion_texture, *cross_texture, *orn_texture; // gia tis eikones
     Mix_Chunk *gem_sfx;
     TTF_Font *main_font;
 
     // edo pairnei sprites objects?
-    ng_sprite_t player, cross, orn;
+    ng_sprite_t cross, orn, player;
     ng_label_t welcome_text;
     ng_animated_sprite_t explosion;
 } ctx;
@@ -34,7 +35,9 @@ static void create_actors(void)
     
     // loads assets
     ctx.main_font = TTF_OpenFont("res/free_mono.ttf", 16);
-    ctx.player_texture = IMG_LoadTexture(ctx.game.renderer, "res/player.png");
+
+    ctx.player_texture = IMG_LoadTexture(ctx.game.renderer, "res/gingy.png");
+
     ctx.explosion_texture = IMG_LoadTexture(ctx.game.renderer, "res/explosion.png");
     ctx.cross_texture = IMG_LoadTexture(ctx.game.renderer, "res/cross.png");
     ctx.orn_texture = IMG_LoadTexture(ctx.game.renderer, "res/red_orn.png");
@@ -52,7 +55,9 @@ static void create_actors(void)
     ctx.explosion.sprite.transform.x = 200.0f;
         // ballsss
     ng_sprite_create(&ctx.orn, ctx.orn_texture);
-    ng_sprite_set_scale(&ctx.orn, 2.0f);    
+    ng_sprite_set_scale(&ctx.orn, 2.0f);   
+    ctx.orn.transform.x = 100;
+    ctx.orn.transform.y = 100; 
         // crosshair
     ng_sprite_create(&ctx.cross, ctx.cross_texture);
     ng_sprite_set_scale(&ctx.cross, 2.0f);
@@ -81,7 +86,6 @@ static void handle_event(SDL_Event *event)
         // By the way, that's how you can implement a custom cursor
         ctx.cross.transform.x = event->motion.x - ctx.cross.transform.w / 2;
         ctx.cross.transform.y = event->motion.y - ctx.cross.transform.h / 2;
-        
         break;
     }
 }
@@ -91,10 +95,25 @@ static void update_and_render_scene(float delta)
     // Handling "continuous" events, which are now repeatable
     const Uint8* keys = SDL_GetKeyboardState(NULL);
 
-    if (keys[SDL_SCANCODE_LEFT] && ctx.player.transform.x > 0) ctx.player.transform.x -= PLAYER_SPEED* delta;
-    if (keys[SDL_SCANCODE_RIGHT] && ctx.player.transform.x < (WIDTH - 2 * ctx.player.src.w)) ctx.player.transform.x += PLAYER_SPEED* delta;
-    if (keys[SDL_SCANCODE_UP] && ctx.player.transform.y > 0) ctx.player.transform.y -= PLAYER_SPEED* delta;
-    if (keys[SDL_SCANCODE_DOWN] && ctx.player.transform.y < (HEIGHT - 2 * ctx.player.src.h)) ctx.player.transform.y += PLAYER_SPEED* delta;
+    if (keys[SDL_SCANCODE_LEFT] && ctx.player.transform.x > 0) {
+        ctx.player.transform.x -= PLAYER_SPEED* delta;
+        // change the frame to the proper one here for player movemnt
+    }
+
+    if (keys[SDL_SCANCODE_RIGHT] && ctx.player.transform.x < (WIDTH - 2 * ctx.player.src.w)) {
+        ctx.player.transform.x += PLAYER_SPEED* delta;
+        // change the frame to the proper one here for player movemnt
+    }
+
+    if (keys[SDL_SCANCODE_UP] && ctx.player.transform.y > 0) {
+        ctx.player.transform.y -= PLAYER_SPEED* delta;
+        // change the frame to the proper one here for player movemnt
+    }
+
+    if (keys[SDL_SCANCODE_DOWN] && ctx.player.transform.y < (HEIGHT - 2 * ctx.player.src.h)) {
+        ctx.player.transform.y += PLAYER_SPEED* delta;
+        // change the frame to the proper one here for player movemnt
+    } 
 
     // Update the explosion's frame once every 100ms
     if (ng_interval_is_ready(&ctx.game_tick))
@@ -103,7 +122,6 @@ static void update_and_render_scene(float delta)
                 % ctx.explosion.total_frames);
     }
     // rendering
-
     ng_sprite_render(&ctx.player, ctx.game.renderer);
    
     ng_sprite_render(&ctx.explosion.sprite, ctx.game.renderer);
