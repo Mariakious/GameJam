@@ -130,14 +130,16 @@ static void update_and_render_scene(float delta)
     ng_sprite_render(&ctx.explosion.sprite, ctx.game.renderer);
     ng_sprite_render(&ctx.welcome_text.sprite, ctx.game.renderer);
 
-    if (flag = 1) {
+    if (flag == 1) {
         ctx.orn.transform.x = ctx.player.transform.x;
         ctx.orn.transform.y = ctx.player.transform.y;
         ng_sprite_render(&ctx.orn, ctx.game.renderer);
         flag++;
-    } 
+    }
     if (flag > 1) {
         ng_sprite_render(&ctx.orn, ctx.game.renderer);
+        ctx.orn.transform.x = ctx.orn.transform.x + (2* PLAYER_SPEED* delta);
+        //ctx.orn.transform.y = ctx.orn.transform.y + (2* PLAYER_SPEED* delta);
     }
 
     ng_sprite_render(&ctx.cross, ctx.game.renderer);
