@@ -14,7 +14,10 @@
 int STOP_FIRE = 0;
 #define MAX_BULL_ON_SCREEN 10 // lower numbers may risk the bullets despawn before they hit anything
 
-
+struct point
+{
+    int x, y;
+};
 
 struct orn
 {
@@ -34,17 +37,17 @@ static struct
     // Ideally, they should have been automatically loaded
     // by iterating over the res/ folder and filling in a hastable
 
-    SDL_Texture *player_texture, *explosion_texture /**cross_texture*/; // gia tis eikones
+    SDL_Texture *player_texture, *explosion_texture, *cross_texture; // gia tis eikones
     Mix_Chunk *gem_sfx;
     TTF_Font *main_font;
 
     // edo pairnei sprites objects?
-    ng_sprite_t /*cross*/ player;
+    ng_sprite_t cross, player;
     ng_label_t welcome_text;
     ng_animated_sprite_t explosion;
 } ctx;
 
-int fire(int x, int y) { // fire gives the bullet one of 4 directions to go and then sets its start position to player x/y
+void fire(int x, int y) { // fire gives the bullet one of 4 directions to go and then sets its start position to player x/y
     bullets.last_fired++;
     if (bullets.last_fired > MAX_BULL_ON_SCREEN - 1) bullets.last_fired = 0;
         bullets.x[bullets.last_fired] = x;
@@ -52,6 +55,11 @@ int fire(int x, int y) { // fire gives the bullet one of 4 directions to go and 
         bullets.bul[bullets.last_fired].transform.x = ctx.player.transform.x;
         bullets.bul[bullets.last_fired].transform.y = ctx.player.transform.y;
 }
+
+int checkColision(ng_sprite_t a, ng_sprite_t b) { // figures out if objects a and b are touching eachother
+// put colision code here
+}
+
 // this commented code checks if a bullet is out of bounds, might be useful, might be wrong
 // && (bullets.bul[bullets.j].transform.x > 0 || 
 //        bullets.bul[bullets.j].transform.x < (WIDTH - 2 * bullets.bul[bullets.j].transform.w)) && (bullets.bul[bullets.j].transform.y > 0 || 
@@ -66,7 +74,7 @@ static void create_actors(void)
     ctx.player_texture = IMG_LoadTexture(ctx.game.renderer, "res/gingy.png");
 
     ctx.explosion_texture = IMG_LoadTexture(ctx.game.renderer, "res/explosion.png");
-    //ctx.cross_texture = IMG_LoadTexture(ctx.game.renderer, "res/cross.png");
+    ctx.cross_texture = IMG_LoadTexture(ctx.game.renderer, "res/cross.png");
     for (bullets.j = 0; bullets.j < MAX_BULL_ON_SCREEN; bullets.j++) {
         bullets.bul_texture[bullets.j] = IMG_LoadTexture(ctx.game.renderer, "res/red_orn.png");
     }
@@ -92,8 +100,8 @@ static void create_actors(void)
         bullets.bul[bullets.j].transform.y = -100000;
     }
         // crosshair
-    //ng_sprite_create(&ctx.cross, ctx.cross_texture);
-    //ng_sprite_set_scale(&ctx.cross, 2.0f);
+    ng_sprite_create(&ctx.cross, ctx.cross_texture);
+    ng_sprite_set_scale(&ctx.cross, 2.0f);
 
    // ng_label_create(&ctx.welcome_text, ctx.main_font, 300);
    // ng_label_set_content(&ctx.welcome_text, ctx.game.renderer,
@@ -114,8 +122,8 @@ static void handle_event(SDL_Event *event)
             ng_audio_play(ctx.gem_sfx);
         break;
     case SDL_MOUSEMOTION:
-        //ctx.cross.transform.x = event->motion.x - ctx.cross.transform.w / 2;
-        //ctx.cross.transform.y = event->motion.y - ctx.cross.transform.h / 2;
+        ctx.cross.transform.x = event->motion.x - ctx.cross.transform.w / 2;
+        ctx.cross.transform.y = event->motion.y - ctx.cross.transform.h / 2;
         break;
     }
 
@@ -190,13 +198,15 @@ static void update_and_render_scene(float delta)
     for (bullets.j = 0; bullets.j < MAX_BULL_ON_SCREEN; bullets.j++) {
         ng_sprite_render(&bullets.bul[bullets.j], ctx.game.renderer);
     }
-        
-    //ng_sprite_render(&ctx.cross, ctx.game.renderer);
+    
+    ng_sprite_render(&ctx.cross, ctx.game.renderer);
+
 }
 
 int main()
 {
     bullets.last_fired = -1;
+    
     create_actors();
     ng_game_start_loop(&ctx.game,
             handle_event, update_and_render_scene);
