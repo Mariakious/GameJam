@@ -2,6 +2,7 @@
 #include <math.h>
 
 #define SQUARE(x) (x * x)
+#define PI 3.14159265358979323846
 
 float ng_vector_get_magnitude(ng_vec2 *source)
 {
@@ -58,4 +59,11 @@ int ng_get_distance(int x, int y, int other_x, int other_y)
 {
     // Basically getting the magnitude of the distance vector
     return sqrt(SQUARE(other_x - x) + SQUARE(other_y - y));
+}
+
+// added this one here for getting the angle between two points
+float getAngle(int x1, int y1, int x2, int y2)
+{
+    float angle = -90 + atan2(y1 - y2, x1 - x2) * (180 / PI);
+    return angle >= 0 ? angle : 360 + angle;
 }

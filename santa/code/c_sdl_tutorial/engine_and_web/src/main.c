@@ -5,12 +5,14 @@
 #include "engine/interface.h"
 #include "engine/timers.h"
 #include "engine/audio.h"
+#include "engine/custom_math.h"
 
 #define WIDTH 1280
 #define HEIGHT 720
 #define PLAYER_SPEED 320
 #define BULLET_COUNT 3
-int flag = 0, /*flag detects clicks*/  j = 0; // j for counting bullets
+
+
 static struct
 {
     ng_game_t game;
@@ -20,12 +22,12 @@ static struct
     // Ideally, they should have been automatically loaded
     // by iterating over the res/ folder and filling in a hastable
 
-    SDL_Texture *player_texture, *explosion_texture, *cross_texture, *orn_texture[BULLET_COUNT]; // gia tis eikones
+    SDL_Texture *player_texture, *explosion_texture, *cross_texture; // gia tis eikones
     Mix_Chunk *gem_sfx;
     TTF_Font *main_font;
 
     // edo pairnei sprites objects?
-    ng_sprite_t cross, orn[BULLET_COUNT], player;
+    ng_sprite_t cross, player;
     ng_label_t welcome_text;
     ng_animated_sprite_t explosion;
 } ctx;
@@ -41,7 +43,7 @@ static void create_actors(void)
 
     ctx.explosion_texture = IMG_LoadTexture(ctx.game.renderer, "res/explosion.png");
     ctx.cross_texture = IMG_LoadTexture(ctx.game.renderer, "res/cross.png");
-    //ctx.orn_texture[j] = IMG_LoadTexture(ctx.game.renderer, "res/red_orn.png");
+    
     
     ctx.gem_sfx = ng_audio_load("res/gem.wav");
     
@@ -79,7 +81,12 @@ static void handle_event(SDL_Event *event)
         if (event->key.keysym.sym == SDLK_SPACE)
             ng_audio_play(ctx.gem_sfx);
         break;
+    case SDL_MOUSEMOTION:
+        ctx.cross.transform.x = event->motion.x - ctx.cross.transform.w / 2;
+        ctx.cross.transform.y = event->motion.y - ctx.cross.transform.h / 2;
+        break;
     }
+
 }
 
 static void update_and_render_scene(float delta)
@@ -109,9 +116,6 @@ static void update_and_render_scene(float delta)
         // change the frame to the proper one here for player movemnt
     } 
 
-    if (keys[SDL_SCANCODE_RIGHT]) {
-
-    }
 
     // Update the explosion's frame once every 100ms
     if (ng_interval_is_ready(&ctx.game_tick))
@@ -125,24 +129,12 @@ static void update_and_render_scene(float delta)
     ng_sprite_render(&ctx.explosion.sprite, ctx.game.renderer);
     ng_sprite_render(&ctx.welcome_text.sprite, ctx.game.renderer);
 
-    if (flag == 1) { // detect click flag
-        ctx.orn[0].transform.x = ctx.player.transform.x;
-        ctx.orn[0].transform.y = ctx.player.transform.y;
-        ng_sprite_render(&ctx.orn[0], ctx.game.renderer);
-        flag++;
-    }
-    if (flag > 1) {
-        ng_sprite_render(&ctx.orn[0], ctx.game.renderer);
-        ctx.orn[0].transform.x = ctx.orn[0].transform.x + (2* PLAYER_SPEED* delta);
-        //ctx.orn.transform.y = ctx.orn.transform.y + (2* PLAYER_SPEED* delta);
-
-    }
-
     ng_sprite_render(&ctx.cross, ctx.game.renderer);
 }
 
 int main()
 {
+    
     create_actors();
     ng_game_start_loop(&ctx.game,
             handle_event, update_and_render_scene);

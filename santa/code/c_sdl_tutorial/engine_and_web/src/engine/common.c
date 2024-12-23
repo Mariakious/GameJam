@@ -26,3 +26,4 @@ bool ng_random_bool(void)
 {
     return rand() % 2;
 }
+
